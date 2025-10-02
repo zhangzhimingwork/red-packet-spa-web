@@ -1,0 +1,85 @@
+{
+  "numFailedTestSuites": 0,
+  "numFailedTests": 0,
+  "numPassedTestSuites": 1,
+  "numPassedTests": 1,
+  "numPendingTestSuites": 0,
+  "numPendingTests": 0,
+  "numRuntimeErrorTestSuites": 0,
+  "numTodoTests": 0,
+  "numTotalTestSuites": 1,
+  "numTotalTests": 1,
+  "openHandles": [],
+  "snapshot": {
+    "added": 0,
+    "didUpdate": false,
+    "failure": false,
+    "filesAdded": 0,
+    "filesRemoved": 0,
+    "filesRemovedList": [],
+    "filesUnmatched": 0,
+    "filesUpdated": 0,
+    "matched": 0,
+    "total": 0,
+    "unchecked": 0,
+    "uncheckedKeysByFile": [],
+    "unmatched": 0,
+    "updated": 0
+  },
+  "startTime": 1759397204051,
+  "success": false,
+  "testResults": [
+    {
+      "leaks": false,
+      "numFailingTests": 0,
+      "numPassingTests": 1,
+      "numPendingTests": 0,
+      "numTodoTests": 0,
+      "openHandles": [],
+      "perfStats": {
+        "end": 1759397205163,
+        "loadTestEnvironmentEnd": 1759397204557,
+        "loadTestEnvironmentStart": 1759397204086,
+        "runtime": 604,
+        "setupAfterEnvEnd": 1759397204678,
+        "setupAfterEnvStart": 1759397204675,
+        "setupFilesEnd": 1759397204559,
+        "setupFilesStart": 1759397204559,
+        "slow": false,
+        "start": 1759397204559
+      },
+      "skipped": false,
+      "snapshot": {
+        "added": 0,
+        "fileDeleted": false,
+        "matched": 0,
+        "unchecked": 0,
+        "uncheckedKeys": [],
+        "unmatched": 0,
+        "updated": 0
+      },
+      "testFilePath": "/Users/mac/Desktop/作业/代码/第六周周六9.6作业-webpack/red-packet-spa/tests/unit/wallet-connect.spec.tsx",
+      "testResults": [
+        {
+          "ancestorTitles": [
+            "WalletConnect - 基础测试"
+          ],
+          "duration": 157,
+          "failing": false,
+          "failureDetails": [],
+          "failureMessages": [],
+          "fullName": "WalletConnect - 基础测试 应该显示 Connect Wallet 按钮当钱包未连接时",
+          "invocations": 1,
+          "location": null,
+          "numPassingAsserts": 2,
+          "retryReasons": [],
+          "startAt": 1759397205003,
+          "status": "passed",
+          "title": "应该显示 Connect Wallet 按钮当钱包未连接时"
+        }
+      ],
+      "failureMessage": null
+    }
+  ],
+  "wasInterrupted": false
+}
