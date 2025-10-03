@@ -43,4 +43,4 @@ jobs:
 
       # 6. 构建项目（只有测试全部通过才执行）
       - name: Build Project
-        run: npm run build
+        run: yarn client:prod
