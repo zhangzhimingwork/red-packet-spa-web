@@ -28,6 +28,9 @@ jobs:
       - name: Initialize Husky
         run: npm run prepare
 
+      - name: Make husky hooks executable
+        run: chmod +x .husky/pre-push
+
       # 5. 并行执行单元测试和 E2E 测试
       - name: Run Tests
         run: |
