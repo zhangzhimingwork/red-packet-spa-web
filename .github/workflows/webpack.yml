@@ -31,11 +31,11 @@ jobs:
       # 5. 并行执行单元测试和 E2E 测试
       - name: Run Tests
         run: |
-          # 启动前端服务后台运行
-          yarn dev &
-          # 等待服务启动
-          npx wait-on http://localhost:3000
-          # 执行 Husky pre-push 钩子（单元+E2E测试）
+          # # 启动前端服务后台运行
+          # yarn dev &
+          # # 等待服务启动
+          # npx wait-on http://localhost:3000
+          # # 执行 Husky pre-push 钩子（单元+E2E测试）
           .husky/pre-push
 
       # 6. 构建项目（只有测试全部通过才执行）
