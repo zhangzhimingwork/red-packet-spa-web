@@ -21,16 +21,6 @@
   "author": "",
   "license": "ISC",
   "description": "",
-  "jest": {
-    "coverageThreshold": {
-      "global": {
-        "statements": 0,
-        "branches": 0,
-        "lines": 0,
-        "functions": 0
-      }
-    }
-  },
   "jest-stare": {
     "coverageLink": "../jest-coverage/lcov-report/index.html",
     "resultDir": "docs/jest-stare"
