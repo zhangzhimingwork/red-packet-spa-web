@@ -1,4 +1,4 @@
-import { Mastra, createLogger } from '@mastra/core';
+import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -71,10 +71,6 @@ class CodeReviewAgent {
           model: modelConfig,
         }),
       },
-      logger: createLogger({
-        type: 'CONSOLE',
-        level: 'ERROR',
-      }),
     });
 
     // 获取 agent 实例
@@ -84,7 +80,7 @@ class CodeReviewAgent {
   private getDefaultModel(provider: 'ANTHROPIC' | 'OPENAI'): string {
     switch (provider) {
       case 'OPENAI':
-        return 'gpt-4o'; // 或 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'
+        return 'gpt-4o';
       case 'ANTHROPIC':
         return 'claude-sonnet-4-5-20250929';
       default:
