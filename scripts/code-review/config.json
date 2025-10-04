@@ -1,6 +1,8 @@
 {
   "scanPatterns": [
-    "src/**/*.{ts,tsx,js,jsx}",
+    "src/components/**/*.{ts,tsx,js,jsx}",
+    "src/pages/**/*.{ts,tsx,js,jsx}",
+    "src/hooks/**/*.{ts,tsx,js,jsx}",
     "!src/**/*.test.{ts,tsx,js,jsx}",
     "!src/**/*.spec.{ts,tsx,js,jsx}"
   ],
