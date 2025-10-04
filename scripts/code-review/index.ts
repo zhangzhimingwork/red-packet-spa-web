@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
+// 禁用 Mastra telemetry 警告
+(globalThis as any).___MASTRA_TELEMETRY___ = true;
+
 // 首先加载 .env 文件
 import dotenv from 'dotenv';
 import { CodeReviewAgent } from './agent';
