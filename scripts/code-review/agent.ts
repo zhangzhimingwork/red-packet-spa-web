@@ -17,6 +17,8 @@ interface CodeReviewConfig {
   };
   outputFormat: string;
   outputPath: string;
+  aiProvider?: 'ANTHROPIC' | 'OPENAI';
+  aiModel?: string;
 }
 
 interface ReviewIssue {
@@ -40,6 +42,13 @@ class CodeReviewAgent {
   constructor(configPath: string) {
     this.config = this.loadConfig(configPath);
     
+    // 从环境变量或配置文件获取 AI 提供商
+    const provider = this.config.aiProvider || 
+                     (process.env.OPENAI_API_KEY ? 'OPENAI' : 'ANTHROPIC');
+    
+    // 根据提供商选择模型
+    const modelName = this.config.aiModel || this.getDefaultModel(provider);
+    
     // 初始化 Mastra 实例
     this.mastra = new Mastra({
       agents: {
@@ -47,9 +56,8 @@ class CodeReviewAgent {
           name: 'code-reviewer',
           instructions: this.getReviewInstructions(),
           model: {
-            provider: 'ANTHROPIC',
-            name: 'claude-sonnet-4-5-20250929',
-            toolChoice: 'auto',
+            provider: provider,
+            name: modelName,
           },
         }),
       },
@@ -57,6 +65,17 @@ class CodeReviewAgent {
 
     // 获取 agent 实例
     this.agent = this.mastra.getAgent('codeReviewer');
+  }
+
+  private getDefaultModel(provider: 'ANTHROPIC' | 'OPENAI'): string {
+    switch (provider) {
+      case 'OPENAI':
+        return 'gpt-4o'; // 或 'gpt-4-turbo', 'gpt-4', 'gpt-3.5-turbo'
+      case 'ANTHROPIC':
+        return 'claude-sonnet-4-5-20250929';
+      default:
+        return 'gpt-4o';
+    }
   }
 
   private loadConfig(configPath: string): CodeReviewConfig {
