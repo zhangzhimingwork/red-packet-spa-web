@@ -1,4 +1,4 @@
-import { Mastra } from '@mastra/core';
+import { Mastra, createLogger } from '@mastra/core';
 import { Agent } from '@mastra/core';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -49,18 +49,32 @@ class CodeReviewAgent {
     // 根据提供商选择模型
     const modelName = this.config.aiModel || this.getDefaultModel(provider);
     
+    // 构建完整的模型配置
+    const modelConfig: any = {
+      provider: provider,
+      name: modelName,
+    };
+    
+    // 为 OpenAI 添加必要的配置
+    if (provider === 'OPENAI') {
+      modelConfig.apiKey = process.env.OPENAI_API_KEY;
+    } else if (provider === 'ANTHROPIC') {
+      modelConfig.apiKey = process.env.ANTHROPIC_API_KEY;
+    }
+    
     // 初始化 Mastra 实例
     this.mastra = new Mastra({
       agents: {
         codeReviewer: new Agent({
           name: 'code-reviewer',
           instructions: this.getReviewInstructions(),
-          model: {
-            provider: provider,
-            name: modelName,
-          },
+          model: modelConfig,
         }),
       },
+      logger: createLogger({
+        type: 'CONSOLE',
+        level: 'ERROR',
+      }),
     });
 
     // 获取 agent 实例
