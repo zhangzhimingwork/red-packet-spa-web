@@ -17,6 +17,7 @@
     "lint:staged": "npx @biomejs/biome check --write ./src",
     "prepare": "husky",
     "code-review": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh",
+    "code-review:enhanced": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh --enhanced",
     "code-review:custom": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh"
   },
   "keywords": [],
@@ -105,6 +106,7 @@
     "webpack-bundle-analyzer": "^4.10.2",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2",
-    "webpackbar": "^7.0.0"
+    "webpackbar": "^7.0.0",
+    "zod": "^3.24.1"
   }
 }
