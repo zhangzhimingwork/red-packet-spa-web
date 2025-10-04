@@ -1,6 +1,7 @@
 import { Mastra } from '@mastra/core';
 import { Agent } from '@mastra/core';
 import { openai } from '@ai-sdk/openai';
+import { generateText } from 'ai';
 import * as fs from 'fs';
 import * as path from 'path';
 import { glob } from 'glob';
@@ -35,40 +36,17 @@ interface ReviewResult {
 }
 
 class CodeReviewAgent {
-  private mastra: Mastra;
-  private agent: Agent;
   private config: CodeReviewConfig;
+  private model: any;
 
   constructor(configPath: string) {
     this.config = this.loadConfig(configPath);
     const modelName = this.config.aiModel || 'gpt-4o-mini';
-    
-    this.mastra = new Mastra({
-      agents: {
-        codeReviewer: new Agent({
-          name: 'code-reviewer',
-          instructions: this.getReviewInstructions(),
-          model: openai(modelName),
-        }),
-      },
-    });
-
-    this.agent = this.mastra.getAgent('codeReviewer') as any;
+    this.model = openai(modelName);
   }
 
   private loadConfig(configPath: string): CodeReviewConfig {
     return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
-  }
-
-  private getReviewInstructions(): string {
-    return `You are a code review expert. Analyze code and return ONLY a JSON array of issues found.
-
-Format:
-[
-  {"type":"code-quality","severity":"medium","line":10,"message":"Variable name too short","suggestion":"Use descriptive names"}
-]
-
-If no issues, return: []`;
   }
 
   async scanFiles(): Promise<string[]> {
@@ -83,29 +61,38 @@ If no issues, return: []`;
     const content = fs.readFileSync(filePath, 'utf-8');
     const relPath = path.relative(process.cwd(), filePath);
 
+    const prompt = `You are a code review expert. Analyze this code and return ONLY a JSON array of issues.
+
+File: ${relPath}
+
+\`\`\`
+${content}
+\`\`\`
+
+Format (return ONLY this JSON, nothing else):
+[{"type":"issue-type","severity":"high|medium|low","message":"description","suggestion":"fix"}]
+
+If no issues: []`;
+
     try {
-      const response = await this.agent.generate(`Review this code:\n\nFile: ${relPath}\n\`\`\`\n${content}\n\`\`\``);
+      const { text } = await generateText({
+        model: this.model,
+        prompt: prompt,
+      });
       
       let issues: ReviewIssue[] = [];
-      const text = response.text;
-      
-      // 尝试解析 JSON
       const jsonMatch = text.match(/\[[\s\S]*?\]/);
+      
       if (jsonMatch) {
         try {
           issues = JSON.parse(jsonMatch[0]);
         } catch (e) {
-          console.warn(`JSON parse failed for ${relPath}`);
+          console.warn(`Parse failed: ${relPath}`);
         }
       }
       
-      // 如果没有结构化数据，将整个响应作为 issue
       if (issues.length === 0 && text.trim() && text.trim() !== '[]') {
-        issues = [{
-          type: 'ai-feedback',
-          severity: 'medium',
-          message: text.trim()
-        }];
+        issues = [{ type: 'feedback', severity: 'medium', message: text.trim().substring(0, 300) }];
       }
 
       return { file: relPath, issues };
@@ -119,7 +106,7 @@ If no issues, return: []`;
 
   async reviewAll(): Promise<ReviewResult[]> {
     const files = await this.scanFiles();
-    console.log(`\n📁 Found ${files.length} files\n`);
+    console.log(`\n📁 ${files.length} files\n`);
 
     const results: ReviewResult[] = [];
     for (let i = 0; i < files.length; i++) {
@@ -128,32 +115,31 @@ If no issues, return: []`;
       
       const result = await this.reviewFile(files[i]);
       results.push(result);
-      console.log(result.issues.length ? `  ⚠️  ${result.issues.length} issues` : `  ✅ Clean`);
+      console.log(result.issues.length ? `  ⚠️  ${result.issues.length}` : `  ✅`);
     }
     return results;
   }
 
   generateReport(results: ReviewResult[]): string {
-    const totalIssues = results.reduce((sum, r) => sum + r.issues.length, 0);
-    const high = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'high').length, 0);
-    const med = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'medium').length, 0);
-    const low = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'low').length, 0);
+    const total = results.reduce((s, r) => s + r.issues.length, 0);
+    const high = results.reduce((s, r) => s + r.issues.filter(i => i.severity === 'high').length, 0);
+    const med = results.reduce((s, r) => s + r.issues.filter(i => i.severity === 'medium').length, 0);
+    const low = results.reduce((s, r) => s + r.issues.filter(i => i.severity === 'low').length, 0);
     
-    let report = `# Code Review Report\n\nGenerated: ${new Date().toLocaleString()}\n\n`;
-    report += `## Summary\n\n- Files: ${results.length}\n- Issues: ${totalIssues} (🔴 ${high} | 🟡 ${med} | 🟢 ${low})\n\n`;
+    let report = `# Code Review\n\n${new Date().toLocaleString()}\n\n`;
+    report += `**${results.length} files** | **${total} issues** (🔴${high} 🟡${med} 🟢${low})\n\n`;
 
-    for (const severity of ['high', 'medium', 'low']) {
-      const icon = severity === 'high' ? '🔴' : severity === 'medium' ? '🟡' : '🟢';
-      const issues = results.flatMap(r => 
-        r.issues.filter(i => i.severity === severity).map(i => ({ ...i, file: r.file }))
+    for (const sev of ['high', 'medium', 'low']) {
+      const icon = sev === 'high' ? '🔴' : sev === 'medium' ? '🟡' : '🟢';
+      const items = results.flatMap(r => 
+        r.issues.filter(i => i.severity === sev).map(i => ({ ...i, file: r.file }))
       );
       
-      if (issues.length > 0) {
-        report += `## ${icon} ${severity.toUpperCase()}\n\n`;
-        for (const issue of issues) {
-          report += `**${issue.file}** - ${issue.type}\n`;
-          report += `- ${issue.message}\n`;
-          if (issue.suggestion) report += `- Fix: ${issue.suggestion}\n`;
+      if (items.length > 0) {
+        report += `## ${icon} ${sev.toUpperCase()}\n\n`;
+        for (const item of items) {
+          report += `**${item.file}**\n- ${item.message}\n`;
+          if (item.suggestion) report += `- Fix: ${item.suggestion}\n`;
           report += `\n`;
         }
       }
@@ -167,7 +153,7 @@ If no issues, return: []`;
     const dir = this.config.outputPath;
     if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    const file = path.join(dir, `review-${new Date().toISOString().replace(/[:.]/g, '-')}.md`);
+    const file = path.join(dir, `review-${Date.now()}.md`);
     fs.writeFileSync(file, report);
     fs.writeFileSync(path.join(dir, 'latest.md'), report);
     console.log(`\n📄 ${file}`);
