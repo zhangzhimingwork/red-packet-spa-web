@@ -3,7 +3,7 @@ name: CI with Husky, Jest, and Cypress
 on:
   push:
     branches:
-      - '**'
+      - main
 
 jobs:
   test-and-build:
@@ -28,18 +28,19 @@ jobs:
       - name: Initialize Husky
         run: npm run prepare
 
+      # 5. 设置可执行权限 Husky
       - name: Make husky hooks executable
-        run: chmod +x .husky/pre-push
+        run: chmod +x .husky/pre-commit
 
-      # 5. 并行执行单元测试和 E2E 测试
+      # 6. 并行执行单元测试和 E2E 测试
       - name: Run Tests
         run: |
           # 启动前端服务后台运行
           yarn dev &
           # 等待服务启动
           npx wait-on http://localhost:3000
-          # 执行 Husky pre-push 钩子（单元+E2E测试）
-          .husky/pre-push
+          # 执行 Husky pre-commit 钩子（单元+E2E测试）
+          .husky/pre-commit
 
       # 6. 构建项目（只有测试全部通过才执行）
       - name: Build Project
