@@ -22,5 +22,6 @@
     "checkReactPatterns": true
   },
   "outputFormat": "markdown",
-  "outputPath": "docs/code-review"
+  "outputPath": "docs/code-review",
+  "language": "zh-CN"
 }
