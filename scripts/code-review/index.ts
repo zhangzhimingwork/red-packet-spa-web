@@ -26,7 +26,10 @@ async function main() {
 
   console.log('🤖 使用 Groq AI (免费)\n');
 
-  const configPath = process.argv[2] || path.join(__dirname, 'config.json');
+  // 过滤掉选项参数，只取配置文件路径
+  const args = process.argv.slice(2).filter(arg => !arg.startsWith('--') && !arg.startsWith('-'));
+  const configPath = args[0] || path.join(__dirname, 'config.json');
+  
   const useEnhanced = process.argv.includes('--enhanced') || process.argv.includes('-e');
   const exitOnError = process.argv.includes('--strict');
   
