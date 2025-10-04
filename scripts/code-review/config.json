@@ -1,0 +1,24 @@
+{
+  "scanPatterns": [
+    "src/**/*.{ts,tsx,js,jsx}",
+    "!src/**/*.test.{ts,tsx,js,jsx}",
+    "!src/**/*.spec.{ts,tsx,js,jsx}"
+  ],
+  "excludePatterns": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "coverage/**",
+    "*.config.{js,ts}"
+  ],
+  "reviewRules": {
+    "checkCodeQuality": true,
+    "checkSecurity": true,
+    "checkPerformance": true,
+    "checkBestPractices": true,
+    "checkTypeScript": true,
+    "checkReactPatterns": true
+  },
+  "outputFormat": "markdown",
+  "outputPath": "docs/code-review"
+}
