@@ -18,7 +18,6 @@ interface CodeReviewConfig {
   };
   outputFormat: string;
   outputPath: string;
-  aiProvider?: 'ANTHROPIC' | 'OPENAI';
   aiModel?: string;
 }
 
@@ -42,32 +41,19 @@ class CodeReviewAgent {
 
   constructor(configPath: string) {
     this.config = this.loadConfig(configPath);
-    
-    const provider = this.config.aiProvider || 
-                     (process.env.OPENAI_API_KEY ? 'OPENAI' : 'ANTHROPIC');
-    
-    const modelName = this.config.aiModel || this.getDefaultModel(provider);
-    
-    // 使用 AI SDK 方式配置模型
-    const model = provider === 'OPENAI' 
-      ? openai(modelName)
-      : { provider: 'ANTHROPIC', name: modelName, apiKey: process.env.ANTHROPIC_API_KEY };
+    const modelName = this.config.aiModel || 'gpt-4o-mini';
     
     this.mastra = new Mastra({
       agents: {
         codeReviewer: new Agent({
           name: 'code-reviewer',
           instructions: this.getReviewInstructions(),
-          model: model,
+          model: openai(modelName),
         }),
       },
     });
 
-    this.agent = this.mastra.getAgent('codeReviewer');
-  }
-
-  private getDefaultModel(provider: 'ANTHROPIC' | 'OPENAI'): string {
-    return provider === 'OPENAI' ? 'gpt-4o' : 'claude-sonnet-4-5-20250929';
+    this.agent = this.mastra.getAgent('codeReviewer') as any;
   }
 
   private loadConfig(configPath: string): CodeReviewConfig {
@@ -75,26 +61,14 @@ class CodeReviewAgent {
   }
 
   private getReviewInstructions(): string {
-    const rules = this.config.reviewRules;
-    let instructions = `You are a professional code review expert. Review the provided code and provide detailed feedback.
+    return `You are a code review expert. Analyze code and return ONLY a JSON array of issues found.
 
-Review Focus Areas:
-`;
+Format:
+[
+  {"type":"code-quality","severity":"medium","line":10,"message":"Variable name too short","suggestion":"Use descriptive names"}
+]
 
-    if (rules.checkCodeQuality) instructions += `- Code Quality\n`;
-    if (rules.checkSecurity) instructions += `- Security\n`;
-    if (rules.checkPerformance) instructions += `- Performance\n`;
-    if (rules.checkBestPractices) instructions += `- Best Practices\n`;
-    if (rules.checkTypeScript) instructions += `- TypeScript\n`;
-    if (rules.checkReactPatterns) instructions += `- React Patterns\n`;
-
-    instructions += `
-Return results as JSON array:
-[{"type":"issue-type","severity":"high|medium|low","line":number,"message":"description","suggestion":"fix"}]
-
-Return ONLY the JSON array.`;
-
-    return instructions;
+If no issues, return: []`;
   }
 
   async scanFiles(): Promise<string[]> {
@@ -110,65 +84,93 @@ Return ONLY the JSON array.`;
     const relPath = path.relative(process.cwd(), filePath);
 
     try {
-      const response = await this.agent.generate(`Review file: ${relPath}\n\n\`\`\`\n${content}\n\`\`\``);
+      const response = await this.agent.generate(`Review this code:\n\nFile: ${relPath}\n\`\`\`\n${content}\n\`\`\``);
       
       let issues: ReviewIssue[] = [];
-      try {
-        const jsonMatch = response.text.match(/\[[\s\S]*\]/);
-        if (jsonMatch) {
+      const text = response.text;
+      
+      // 尝试解析 JSON
+      const jsonMatch = text.match(/\[[\s\S]*?\]/);
+      if (jsonMatch) {
+        try {
           issues = JSON.parse(jsonMatch[0]);
+        } catch (e) {
+          console.warn(`JSON parse failed for ${relPath}`);
         }
-      } catch (e) {
-        issues = [{ type: 'review-feedback', severity: 'medium', message: response.text.substring(0, 200) }];
+      }
+      
+      // 如果没有结构化数据，将整个响应作为 issue
+      if (issues.length === 0 && text.trim() && text.trim() !== '[]') {
+        issues = [{
+          type: 'ai-feedback',
+          severity: 'medium',
+          message: text.trim()
+        }];
       }
 
-      return { file: relPath, issues: issues.filter(i => i.type && i.severity && i.message) };
+      return { file: relPath, issues };
     } catch (error) {
       return {
         file: relPath,
-        issues: [{ type: 'error', severity: 'high', message: `Review failed: ${error instanceof Error ? error.message : String(error)}` }]
+        issues: [{ type: 'error', severity: 'high', message: `Failed: ${error}` }]
       };
     }
   }
 
   async reviewAll(): Promise<ReviewResult[]> {
     const files = await this.scanFiles();
-    console.log(`\n📁 Found ${files.length} files to review...\n`);
+    console.log(`\n📁 Found ${files.length} files\n`);
 
     const results: ReviewResult[] = [];
     for (let i = 0; i < files.length; i++) {
       const relPath = path.relative(process.cwd(), files[i]);
-      console.log(`[${i + 1}/${files.length}] Reviewing: ${relPath}`);
+      console.log(`[${i + 1}/${files.length}] ${relPath}`);
       
       const result = await this.reviewFile(files[i]);
       results.push(result);
-      console.log(result.issues.length > 0 ? `  ⚠️  Found ${result.issues.length} issue(s)` : `  ✅ No issues found`);
+      console.log(result.issues.length ? `  ⚠️  ${result.issues.length} issues` : `  ✅ Clean`);
     }
     return results;
   }
 
   generateReport(results: ReviewResult[]): string {
     const totalIssues = results.reduce((sum, r) => sum + r.issues.length, 0);
-    const highSeverity = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'high').length, 0);
+    const high = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'high').length, 0);
+    const med = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'medium').length, 0);
+    const low = results.reduce((sum, r) => sum + r.issues.filter(i => i.severity === 'low').length, 0);
     
     let report = `# Code Review Report\n\nGenerated: ${new Date().toLocaleString()}\n\n`;
-    report += `## Summary\n\n- Files reviewed: ${results.length}\n- Total issues: ${totalIssues}\n`;
-    
-    // Add issues by severity...
+    report += `## Summary\n\n- Files: ${results.length}\n- Issues: ${totalIssues} (🔴 ${high} | 🟡 ${med} | 🟢 ${low})\n\n`;
+
+    for (const severity of ['high', 'medium', 'low']) {
+      const icon = severity === 'high' ? '🔴' : severity === 'medium' ? '🟡' : '🟢';
+      const issues = results.flatMap(r => 
+        r.issues.filter(i => i.severity === severity).map(i => ({ ...i, file: r.file }))
+      );
+      
+      if (issues.length > 0) {
+        report += `## ${icon} ${severity.toUpperCase()}\n\n`;
+        for (const issue of issues) {
+          report += `**${issue.file}** - ${issue.type}\n`;
+          report += `- ${issue.message}\n`;
+          if (issue.suggestion) report += `- Fix: ${issue.suggestion}\n`;
+          report += `\n`;
+        }
+      }
+    }
+
     return report;
   }
 
   async saveReport(results: ReviewResult[]): Promise<void> {
     const report = this.generateReport(results);
-    const outputDir = this.config.outputPath;
-    
-    if (!fs.existsSync(outputDir)) {
-      fs.mkdirSync(outputDir, { recursive: true });
-    }
+    const dir = this.config.outputPath;
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 
-    const filePath = path.join(outputDir, `code-review-${new Date().toISOString().replace(/[:.]/g, '-')}.md`);
-    fs.writeFileSync(filePath, report);
-    console.log(`\n📄 Report saved to: ${filePath}`);
+    const file = path.join(dir, `review-${new Date().toISOString().replace(/[:.]/g, '-')}.md`);
+    fs.writeFileSync(file, report);
+    fs.writeFileSync(path.join(dir, 'latest.md'), report);
+    console.log(`\n📄 ${file}`);
   }
 }
 
