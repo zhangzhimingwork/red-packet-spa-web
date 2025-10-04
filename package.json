@@ -15,7 +15,9 @@
     "lint:fix": "tsc --noEmit & eslint ./src --ext .ts,.tsx,.js --fix",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:staged": "npx @biomejs/biome check --write ./src",
-    "prepare": "husky"
+    "prepare": "husky",
+    "code-review": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh",
+    "code-review:custom": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh"
   },
   "keywords": [],
   "author": "",
@@ -49,6 +51,7 @@
   "devDependencies": {
     "@biomejs/biome": "^2.2.3",
     "@eslint/js": "^9.36.0",
+    "@mastra/core": "^0.1.62",
     "@soda/friendly-errors-webpack-plugin": "^1.8.1",
     "@swc/core": "^1.13.5",
     "@swc/jest": "^0.2.39",
@@ -58,6 +61,7 @@
     "@testing-library/react": "^16.3.0",
     "@types/jest": "^30.0.0",
     "@types/minimatch": "^6.0.0",
+    "@types/node": "^22.10.5",
     "@types/react": "^19.1.12",
     "@types/react-blockies": "^1.4.4",
     "@types/react-dom": "^19.1.9",
@@ -73,6 +77,7 @@
     "eslint-plugin-prettier": "^5.5.4",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^5.2.0",
+    "glob": "^11.0.0",
     "globals": "^16.4.0",
     "html-webpack-plugin": "^5.6.4",
     "husky": "^9.1.7",
@@ -93,6 +98,7 @@
     "tailwindcss": "^4.1.13",
     "terser-webpack-plugin": "^5.3.14",
     "themed-progress-plugin": "^1.0.1",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.2",
     "typescript-eslint": "^8.44.1",
     "webpack": "^5.101.3",
