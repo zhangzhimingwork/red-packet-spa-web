@@ -1,6 +1,4 @@
-import { Mastra } from '@mastra/core';
-import { Agent } from '@mastra/core';
-import { openai } from '@ai-sdk/openai';
+import { groq } from '@ai-sdk/groq';
 import { generateText } from 'ai';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -41,8 +39,8 @@ class CodeReviewAgent {
 
   constructor(configPath: string) {
     this.config = this.loadConfig(configPath);
-    const modelName = this.config.aiModel || 'gpt-4o-mini';
-    this.model = openai(modelName);
+    const modelName = this.config.aiModel || 'llama-3.3-70b-versatile';
+    this.model = groq(modelName);
   }
 
   private loadConfig(configPath: string): CodeReviewConfig {
@@ -126,7 +124,7 @@ If no issues: []`;
     const med = results.reduce((s, r) => s + r.issues.filter(i => i.severity === 'medium').length, 0);
     const low = results.reduce((s, r) => s + r.issues.filter(i => i.severity === 'low').length, 0);
     
-    let report = `# Code Review\n\n${new Date().toLocaleString()}\n\n`;
+    let report = `# Code Review Report\n\n${new Date().toLocaleString()}\n\n`;
     report += `**${results.length} files** | **${total} issues** (🔴${high} 🟡${med} 🟢${low})\n\n`;
 
     for (const sev of ['high', 'medium', 'low']) {
