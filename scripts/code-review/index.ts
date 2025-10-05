@@ -5,7 +5,6 @@
 
 import dotenv from 'dotenv';
 import { CodeReviewAgent } from './agent';
-import { EnhancedCodeReviewAgent } from './enhanced-agent';
 import * as path from 'path';
 
 dotenv.config();
@@ -33,30 +32,7 @@ async function main() {
   const useEnhanced = process.argv.includes('--enhanced') || process.argv.includes('-e');
   const exitOnError = process.argv.includes('--strict');
   
-  if (useEnhanced) {
-    console.log('🚀 增强审查模式\n');
-    const agent = new EnhancedCodeReviewAgent(configPath);
-    
-    try {
-      const results = await agent.reviewAll();
-      await agent.saveReport(results);
-      
-      console.log('\n✅ 审查完成!');
-      
-      const hasHighSeverity = results.some(r => 
-        r.issues.some(i => i.severity === 'high')
-      );
-      
-      if (hasHighSeverity) {
-        console.log('\n⚠️  发现高危问题!');
-        if (exitOnError) process.exit(1);
-      }
-    } catch (error) {
-      console.error('\n❌ 审查失败:', error);
-      process.exit(1);
-    }
-  } else {
-    console.log('📝 标准审查模式\n');
+  console.log('📝 标准审查模式\n');
     const agent = new CodeReviewAgent(configPath);
     
     try {
@@ -77,7 +53,6 @@ async function main() {
       console.error('\n❌ 审查失败:', error);
       process.exit(1);
     }
-  }
 }
 
 main();

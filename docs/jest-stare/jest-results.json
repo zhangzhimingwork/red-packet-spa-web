@@ -26,7 +26,7 @@
     "unmatched": 0,
     "updated": 0
   },
-  "startTime": 1759629308413,
+  "startTime": 1759630042860,
   "success": false,
   "testResults": [
     {
@@ -37,16 +37,16 @@
       "numTodoTests": 0,
       "openHandles": [],
       "perfStats": {
-        "end": 1759629311091,
-        "loadTestEnvironmentEnd": 1759629309548,
-        "loadTestEnvironmentStart": 1759629308511,
-        "runtime": 1540,
-        "setupAfterEnvEnd": 1759629309821,
-        "setupAfterEnvStart": 1759629309757,
-        "setupFilesEnd": 1759629309551,
-        "setupFilesStart": 1759629309551,
+        "end": 1759630044970,
+        "loadTestEnvironmentEnd": 1759630043692,
+        "loadTestEnvironmentStart": 1759630042942,
+        "runtime": 1276,
+        "setupAfterEnvEnd": 1759630043848,
+        "setupAfterEnvStart": 1759630043844,
+        "setupFilesEnd": 1759630043694,
+        "setupFilesStart": 1759630043694,
         "slow": false,
-        "start": 1759629309551
+        "start": 1759630043694
       },
       "skipped": false,
       "snapshot": {
@@ -64,7 +64,7 @@
           "ancestorTitles": [
             "WalletConnect - 基础测试"
           ],
-          "duration": 163,
+          "duration": 179,
           "failing": false,
           "failureDetails": [],
           "failureMessages": [],
@@ -73,7 +73,7 @@
           "location": null,
           "numPassingAsserts": 2,
           "retryReasons": [],
-          "startAt": 1759629310926,
+          "startAt": 1759630044789,
           "status": "passed",
           "title": "应该显示 Connect Wallet 按钮当钱包未连接时"
         }
