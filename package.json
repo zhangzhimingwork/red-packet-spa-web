@@ -93,7 +93,6 @@
     "postcss-loader": "^8.2.0",
     "prettier": "^3.6.2",
     "puppeteer": "^24.19.0",
-    "rize": "^0.9.0",
     "selenium-webdriver": "^4.35.0",
     "swc-loader": "^0.2.6",
     "tailwindcss": "^4.1.13",
