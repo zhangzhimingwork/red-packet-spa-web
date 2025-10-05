@@ -6,7 +6,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin');
 module.exports = {
   output: {
     path: join(__dirname, '../dist'),
-    publicPath: '/',
+    publicPath: './',
     filename: 'scripts/[name].[contenthash:5].bundule.js',
     assetModuleFilename: 'images/[name].[contenthash:5][ext]',
   },
@@ -30,10 +30,10 @@ module.exports = {
   },
   //用公司现有的组件库 公司自建CDN 上线CI机器压缩
   //优化项目的构建速度 一半在服务器上 一半在本地开发模式上
-  externals: {
-    react: 'React',
-    'react-dom': 'ReactDOM',
-  },
+  // externals: {
+  //   react: 'React',
+  //   'react-dom': 'ReactDOM',
+  // },
   plugins: [
     new HtmlWebpackPlugin({
       title: 'Yideng',
