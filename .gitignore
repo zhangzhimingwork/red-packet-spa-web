@@ -41,3 +41,9 @@ yarn-error.log*
 next-env.d.ts
 
 /docs
+
+# Test coverage and reports
+docs/jest-coverage/
+docs/jest-stare/
+coverage/
+*.coverage
