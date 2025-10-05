@@ -42,6 +42,36 @@ jobs:
           # 执行 Husky pre-commit 钩子（单元+E2E测试）
           .husky/pre-commit
 
+      - name: Run Code Review
+        run: yarn code-review --strict
+        
+      - name: Upload Code Review Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: code-review-report
+          path: docs/code-review/latest-enhanced.md
+          retention-days: 30
+          
+      - name: Comment PR with Review Results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = 'docs/code-review/latest-enhanced.md';
+            
+            if (fs.existsSync(reportPath)) {
+              const report = fs.readFileSync(reportPath, 'utf8');
+              
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: `## 🔍 Code Review Report\n\n${report}`
+              });
+            }
+
       # 6. 构建项目（只有测试全部通过才执行）
       - name: Build Project
         run: yarn client:prod
