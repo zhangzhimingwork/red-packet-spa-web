@@ -1,3 +1,2 @@
-# yarn lint
-# yarn test
-# yarn cypress run --browser chrome
+yarn lint
+yarn test
