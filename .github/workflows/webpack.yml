@@ -4,46 +4,41 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   test-and-build:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 检出代码
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      # 2. 设置 Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
-      # 3. 安装依赖
       - name: Install Dependencies
-        run: yarn install --frozen-lockfile
+        run: npm ci
 
-      # 4. 初始化 Husky
       - name: Initialize Husky
         run: npm run prepare
 
-      # 5. 设置可执行权限 Husky
       - name: Make husky hooks executable
         run: chmod +x .husky/pre-commit
 
-      # 6. 并行执行单元测试和 E2E 测试
       - name: Run Tests
         run: |
-          # 启动前端服务后台运行
-          yarn dev &
-          # 等待服务启动
-          npx wait-on http://localhost:3000
-          # 执行 Husky pre-commit 钩子（单元+E2E测试）
+          npm run dev &
+          npx wait-on http://localhost:8080
           .husky/pre-commit
 
       - name: Run Code Review
-        run: yarn code-review
+        run: npm run code-review
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         
@@ -74,6 +69,5 @@ jobs:
               });
             }
 
-      # 6. 构建项目（只有测试全部通过才执行）
       - name: Build Project
-        run: yarn client:prod
+        run: npm run build
