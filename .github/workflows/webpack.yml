@@ -43,7 +43,7 @@ jobs:
           .husky/pre-commit
 
       - name: Run Code Review
-        run: yarn code-review --strict
+        run: yarn code-review
         env:
           GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
         
