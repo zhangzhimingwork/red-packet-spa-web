@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
 import axios from 'axios';
 
-const API_BASE_URL = 'http://localhost:3001';
+const API_BASE_URL = 'https://red-packet-spa-backend.armin-z-zhang.workers.dev';
 const TOKEN_KEY = 'web3_auth_token';
 
 interface NonceResponse {
