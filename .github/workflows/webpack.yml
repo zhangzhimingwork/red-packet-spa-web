@@ -34,7 +34,7 @@ jobs:
       - name: Run Tests
         run: |
           npm run dev &
-          npx wait-on http://localhost:8080
+          npx wait-on http://localhost:3000
           .husky/pre-commit
 
       - name: Run Code Review
