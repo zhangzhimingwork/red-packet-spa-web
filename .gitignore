@@ -10,6 +10,10 @@
 !.yarn/releases
 !.yarn/versions
 
+# package manager
+package-lock.json
+yarn.lock
+
 # testing
 /coverage
 
@@ -19,6 +23,7 @@
 
 # production
 /build
+/dist
 
 # misc
 .DS_Store
@@ -47,3 +52,7 @@ docs/jest-coverage/
 docs/jest-stare/
 coverage/
 *.coverage
+
+# Cloudflare
+.wrangler/
+wrangler.toml
