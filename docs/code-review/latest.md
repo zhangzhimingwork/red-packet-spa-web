@@ -1,154 +1,41 @@
 # 代码审查报告
 
-2025/10/5 10:06:28
+2025/10/6 19:45:12
 
-**10 文件** | **33 问题** (🔴2 🟡11 🟢20)
+**10 文件** | **10 问题** (🔴9 🟡0 🟢1)
 
 ## 🔴 高危
 
-**src/pages/App.tsx**
-- 没有处理 useReadContract 和 useWriteContract 的错误情况
-- 修复建议: 添加错误处理来处理这些函数可能抛出的错误
-
-**src/hooks/useAuth.ts**
-- 代码中使用了硬编码的API_BASE_URL和TOKEN_KEY，可能会导致安全风险
-- 修复建议: 将API_BASE_URL和TOKEN_KEY配置为环境变量或使用安全的配置文件
-
-## 🟡 中等
-
 **src/components/WalletConnect.tsx**
-- 组件中使用了多个 useState 和 useEffect 钩子，可能导致内存泄漏，如果不正确清除
-- 修复建议: 确保在组件卸载时清除所有副作用和定时器
-
-**src/components/WalletConnect.tsx**
-- 组件中有一些错误处理不完善，可能导致应用崩溃
-- 修复建议: 添加完整的错误处理机制，包括 try-catch 块和错误边界
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99896, Requested 3063. Please try again in 42m35.752999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/components/test/Index.tsx**
-- [
-  {
-    "type": "依赖问题",
-    "severity": "medium",
-    "message": "代码中导入了未使用的依赖",
-    "suggestion": "移除未使用的依赖，例如 '@hooks/useImmer'、'@/types/ethers-contracts'、'ethers' 等"
-  },
-  {
-    "type": "潜在bug",
-    "severity": "medium",
-    "message": "useEffect 中的依赖项不正确",
-    "suggestion": "将依赖项设置为正确的值，例如将 '
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99886, Requested 637. Please try again in 7m31.657s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/components/common/PageNotFoundView.tsx**
-- 按钮和链接元素缺乏明确的标签和描述，可能会导致屏幕阅读器无法正确解读
-- 修复建议: 添加 aria-label 或 aria-labelledby 属性来提供清晰的标签和描述
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99877, Requested 449. Please try again in 4m41.256s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/components/common/Loading.tsx**
-- sizeClasses 对象的类型没有定义
-- 修复建议: 定义 sizeClasses 对象的类型
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99868, Requested 302. Please try again in 2m26.359s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/components/common/Header.tsx**
-- 钱包连接逻辑不完整，可能导致安全风险
-- 修复建议: 添加完整的钱包连接逻辑，包括错误处理和安全校验
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99858, Requested 770. Please try again in 9m2.491s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
+
+**src/pages/DappTest.tsx**
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 100045, Requested 112. Please try again in 2m16.428s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/pages/App.tsx**
-- useEffect 中的依赖项可能会导致无限循环
-- 修复建议: 检查 useEffect 中的依赖项，确保它们不会在每次渲染时发生变化
-
-**src/pages/App.tsx**
-- 一些变量的类型没有明确定义
-- 修复建议: 添加类型注解来明确变量的类型
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 100036, Requested 5454. Please try again in 1h19m3.681s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/hooks/useImmer.tsx**
-- useImmer 函数的类型定义中，S 和 T 两个类型参数没有明确的关系，可能会导致类型混淆
-- 修复建议: 考虑使用一个类型参数，或者明确定义 S 和 T 之间的关系
-
-**src/hooks/useImmer.tsx**
-- useCallback 的依赖数组为空，可能会导致更新函数不被重新创建
-- 修复建议: 考虑添加必要的依赖项到 useCallback 的依赖数组中
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 100027, Requested 530. Please try again in 8m1.365999999s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 **src/hooks/useAuth.ts**
-- 代码中catch块中没有对错误进行详细的日志记录和处理
-- 修复建议: 添加详细的日志记录和错误处理机制
+- Failed: AI_RetryError: Failed after 3 attempts. Last error: Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01k6qey0e7e3n9j8m9rxmkde12` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 100016, Requested 1333. Please try again in 19m26.196s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing
 
 ## 🟢 低危
-
-**src/components/WalletConnect.tsx**
-- 组件中有一些重复的代码，例如格式化地址和余额的函数
-- 修复建议: 提取重复代码为单独的函数或工具类
-
-**src/components/WalletConnect.tsx**
-- 组件中有一些类型定义不明确，可能导致类型错误
-- 修复建议: 添加明确的类型定义，包括接口和类型别名
-
-**src/components/WalletConnect.tsx**
-- 组件中有一些可能影响性能的代码，例如多次渲染和不必要的重新渲染
-- 修复建议: 优化组件的渲染性能，包括使用 shouldComponentUpdate 和 React.memo
-
-**src/components/common/PageNotFoundView.tsx**
-- 使用 window.history.back() 方法可能会导致用户意外地返回到之前的页面，从而导致用户体验不佳
-- 修复建议: 考虑使用更安全的导航方法，例如使用 React Router 的 useHistory 或 useNavigate 钩子
-
-**src/components/common/PageNotFoundView.tsx**
-- 组件中使用了多个魔术字符串（例如 '/','bg-gray-50'），这些字符串可能难以维护和理解
-- 修复建议: 考虑定义一个常量文件或使用一个主题系统来管理这些字符串
-
-**src/components/common/Loading.tsx**
-- LoadingExample 组件的默认值可以直接定义在接口中
-- 修复建议: 将默认值定义在 LoadingProps 接口中
-
-**src/components/common/Loading.tsx**
-- LoadingExample 组件的命名不符合常规，应该直接命名为 Loading
-- 修复建议: 将 LoadingExample 重命名为 Loading
-
-**src/components/common/Loading.tsx**
-- 样式类名 'text-gray-600' 可能与其他组件重复，建议抽取为公共样式
-- 修复建议: 抽取公共样式类名
-
-**src/components/common/Loading.tsx**
-- Example usage 可以放在单独的文件中
-- 修复建议: 将 Example usage 放在单独的文件中
-
-**src/components/common/Header.tsx**
-- 代码中混合了业务逻辑和UI逻辑，建议分离
-- 修复建议: 将业务逻辑抽取到单独的函数或模块中
-
-**src/components/common/Header.tsx**
-- 使用了多个不必要的重渲染，可能导致性能问题
-- 修复建议: 使用useMemo或useCallback优化重渲染
-
-**src/components/common/Header.tsx**
-- 代码中有多处重复的样式代码，建议提取
-- 修复建议: 提取公共样式到单独的文件或组件中
 
 **src/pages/Home.tsx**
 - 代码中没有任何错误处理或边界检查
 - 修复建议: 添加try-catch块或边界检查以提高代码的健壮性
-
-**src/pages/DappTest.tsx**
-- 组件DappTest没有任何功能性代码，可能是一个空组件
-- 修复建议: 添加组件的功能性代码，或者考虑删除这个组件
-
-**src/pages/App.tsx**
-- handleClaimRedPacket、handleToggleActive、handleAddFunds 和 handleEmergencyWithdraw 函数中有重复的代码
-- 修复建议: 抽取一个单独的函数来处理这些重复的代码
-
-**src/pages/App.tsx**
-- 代码组织不够清晰，函数和变量定义混乱
-- 修复建议: 重新组织代码，使用清晰的函数和变量命名，并将相关的代码分组在一起
-
-**src/hooks/useImmer.tsx**
-- useImmer 函数的两个函数签名没有必要，考虑合并成一个函数签名
-- 修复建议: 合并两个函数签名，使用一个类型参数
-
-**src/hooks/useImmer.tsx**
-- immer 库的 produce 函数直接使用了 updater 作为第一个参数，可能会导致不必要的复制
-- 修复建议: 考虑使用 produce 函数的第二个参数，传入一个函数来更新 draft
-
-**src/hooks/useAuth.ts**
-- 代码中使用了多次useState和useCallback，可能会导致性能问题
-- 修复建议: 优化代码结构，减少不必要的状态和回调函数
-
-**src/hooks/useAuth.ts**
-- 代码中有一些魔法字符串和重复代码，可能会导致代码难以维护
-- 修复建议: 提取魔法字符串和重复代码为常量或函数
 
