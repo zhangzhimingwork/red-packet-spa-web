@@ -6,7 +6,7 @@ export const config = createConfig({
   chains: [mainnet, sepolia],
   connectors: [metaMask()],
   transports: {
-    [mainnet.id]: http(),
-    [sepolia.id]: http()
+    [mainnet.id]: http('https://eth-sepolia.g.alchemy.com/v2/qWgz8lluIE1yqE9CMm6mPtVqlhfBbKbw'),
+    [sepolia.id]: http('https://eth-sepolia.g.alchemy.com/v2/qWgz8lluIE1yqE9CMm6mPtVqlhfBbKbw')
   }
 });
