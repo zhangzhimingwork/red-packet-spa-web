@@ -58,6 +58,11 @@ const App: React.FC = () => {
     redPacketInfo = { totalAmount, totalPackets, claimedPackets, remainingAmount, isActive };
   }
 
+  const json = JSON.stringify(redPacketInfo, (_, v) =>
+  typeof v === 'bigint' ? v.toString() : v
+)
+  console.log('redPacketInfo', json);
+
   const { data: userInfoArr, refetch: refetchUserInfo } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
@@ -73,6 +78,11 @@ const App: React.FC = () => {
     const [claimed, amount] = userArr;
     userInfo = { claimed, amount };
   }
+
+  const json1 = JSON.stringify(userInfo, (_, v) =>
+  typeof v === 'bigint' ? v.toString() : v
+)
+  console.log('userInfo', json1);
 
   const { data: previewAmount } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,

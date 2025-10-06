@@ -4,6 +4,7 @@
   "main": "webpack.config.js",
   "scripts": {
     "dev": "webpack serve --mode development",
+    "prod": "webpack serve --mode production",
     "build": "webpack --mode production",
     "preview": "npx serve dist -p 3000",
     "test:ui": "backstop init",
