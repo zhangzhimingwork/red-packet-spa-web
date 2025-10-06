@@ -42,12 +42,26 @@ const App: React.FC = () => {
     setIsClient(true);
   }, []);
 
-  // 合约读取
-  const { data: redPacketInfoArr, refetch: refetchInfo } = useReadContract({
+  // 合约读取 - 添加 enabled 和 query 参数
+  const {
+    data: redPacketInfoArr,
+    refetch: refetchInfo,
+    isLoading: isLoadingInfo,
+    isError: isErrorInfo
+  } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
-    functionName: 'getRedPacketInfo'
-  }) as { data: RedPacketInfoArr | undefined; refetch: () => void };
+    functionName: 'getRedPacketInfo',
+    query: {
+      enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS,
+      refetchInterval: 10000 // 每10秒自动刷新
+    }
+  }) as {
+    data: RedPacketInfoArr | undefined;
+    refetch: () => void;
+    isLoading: boolean;
+    isError: boolean;
+  };
 
   const redPacketArr: [bigint, bigint, bigint, bigint, boolean] | undefined = redPacketInfoArr;
 
@@ -58,17 +72,20 @@ const App: React.FC = () => {
     redPacketInfo = { totalAmount, totalPackets, claimedPackets, remainingAmount, isActive };
   }
 
-  const json = JSON.stringify(redPacketInfo, (_, v) =>
-  typeof v === 'bigint' ? v.toString() : v
-)
-  console.log('redPacketInfo', json);
-
-  const { data: userInfoArr, refetch: refetchUserInfo } = useReadContract({
+  const {
+    data: userInfoArr,
+    refetch: refetchUserInfo,
+    isLoading: isLoadingUser
+  } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
     functionName: 'getUserInfo',
-    args: address ? [address] : undefined
-  }) as { data: UserInfoArr | undefined; refetch: () => void };
+    args: address ? [address] : undefined,
+    query: {
+      enabled: isClient && !!address && !!RED_PACKET_CONTRACT_ADDRESS,
+      refetchInterval: 10000
+    }
+  }) as { data: UserInfoArr | undefined; refetch: () => void; isLoading: boolean };
 
   const userArr: [boolean, bigint] | undefined = userInfoArr;
 
@@ -79,21 +96,22 @@ const App: React.FC = () => {
     userInfo = { claimed, amount };
   }
 
-  const json1 = JSON.stringify(userInfo, (_, v) =>
-  typeof v === 'bigint' ? v.toString() : v
-)
-  console.log('userInfo', json1);
-
   const { data: previewAmount } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
-    functionName: 'previewNextAmount'
+    functionName: 'previewNextAmount',
+    query: {
+      enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS
+    }
   }) as { data: [bigint, bigint] | undefined };
 
   const { data: owner } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
-    functionName: 'owner'
+    functionName: 'owner',
+    query: {
+      enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS
+    }
   }) as { data: Address | undefined };
 
   // 合约写入
@@ -190,6 +208,9 @@ const App: React.FC = () => {
     ? (Number(redPacketInfo.claimedPackets) / Number(redPacketInfo.totalPackets)) * 100
     : 0;
 
+  // 添加加载状态判断
+  const isDataLoading = isLoadingInfo || (isConnected && isLoadingUser);
+
   if (!isClient) return null;
 
   return (
@@ -229,6 +250,25 @@ const App: React.FC = () => {
                 <span>即时到账，无需等待</span>
               </div>
             </div>
+          </div>
+        ) : isDataLoading ? (
+          // 添加全局加载状态
+          <div className="text-center py-20">
+            <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+            <p className="text-xl text-gray-600">加载红包数据中...</p>
+          </div>
+        ) : isErrorInfo ? (
+          // 添加错误状态
+          <div className="text-center py-20">
+            <XCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">加载失败</h2>
+            <p className="text-gray-600 mb-4">无法连接到智能合约，请检查网络连接</p>
+            <button
+              onClick={() => refetchInfo()}
+              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
+            >
+              重试
+            </button>
           </div>
         ) : (
           <div className="flex flex-col">
@@ -307,7 +347,7 @@ const App: React.FC = () => {
                     <div className="flex justify-between items-center">
                       <span className="text-gray-600">总金额</span>
                       <span className="font-semibold text-red-600">
-                        {redPacketInfo ? formatEther(redPacketInfo.totalAmount) : 0} ETH
+                        {formatEther(redPacketInfo.totalAmount)} ETH
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
