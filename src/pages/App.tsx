@@ -13,7 +13,9 @@ import WalletConnect from '../components/WalletConnect';
 
 import { abi as RED_PACKET_ABI } from '../abis';
 
+// 修复：环境变量应该是 REACT_APP_ 开头
 const RED_PACKET_CONTRACT_ADDRESS = process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS as Address;
+console.log('RED_PACKET_CONTRACT_ADDRESS', RED_PACKET_CONTRACT_ADDRESS);
 
 interface RedPacketInfo {
   totalAmount: bigint;
@@ -23,14 +25,10 @@ interface RedPacketInfo {
   isActive: boolean;
 }
 
-type RedPacketInfoArr = [bigint, bigint, bigint, bigint, boolean];
-
 interface UserInfo {
   claimed: boolean;
   amount: bigint;
 }
-
-type UserInfoArr = [boolean, bigint];
 
 const App: React.FC = () => {
   const { address, isConnected } = useAccount();
@@ -42,43 +40,59 @@ const App: React.FC = () => {
     setIsClient(true);
   }, []);
 
-  // 合约读取 - 添加 enabled 和 query 参数
+  // 修复：useReadContract 的正确用法
   const {
-    data: redPacketInfoArr,
+    data: redPacketInfoData,
     refetch: refetchInfo,
     isLoading: isLoadingInfo,
-    isError: isErrorInfo
+    isError: isErrorInfo,
+    error: errorInfo
   } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
     functionName: 'getRedPacketInfo',
     query: {
       enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS,
-      refetchInterval: 10000 // 每10秒自动刷新
+      refetchInterval: 10000
     }
-  }) as {
-    data: RedPacketInfoArr | undefined;
-    refetch: () => void;
-    isLoading: boolean;
-    isError: boolean;
-  };
+  });
 
-  const redPacketArr: [bigint, bigint, bigint, bigint, boolean] | undefined = redPacketInfoArr;
+  // 添加调试日志
+  useEffect(() => {
+    console.log('=== 红包信息调试 ===');
+    console.log('isClient:', isClient);
+    console.log('合约地址:', RED_PACKET_CONTRACT_ADDRESS);
+    console.log('isLoadingInfo:', isLoadingInfo);
+    console.log('isErrorInfo:', isErrorInfo);
+    console.log('errorInfo:', errorInfo);
+    console.log('redPacketInfoData 原始数据:', redPacketInfoData);
+    console.log('redPacketInfoData 类型:', typeof redPacketInfoData);
+  }, [isClient, isLoadingInfo, isErrorInfo, errorInfo, redPacketInfoData]);
 
+  // 修复：数据转换
   let redPacketInfo: RedPacketInfo | undefined;
-
-  if (redPacketArr) {
-    const [totalAmount, totalPackets, claimedPackets, remainingAmount, isActive] = redPacketArr;
-    redPacketInfo = { totalAmount, totalPackets, claimedPackets, remainingAmount, isActive };
+  if (redPacketInfoData && Array.isArray(redPacketInfoData) && redPacketInfoData.length === 5) {
+    const [totalAmount, totalPackets, claimedPackets, remainingAmount, isActive] =
+      redPacketInfoData;
+    redPacketInfo = {
+      totalAmount: totalAmount as bigint,
+      totalPackets: totalPackets as bigint,
+      claimedPackets: claimedPackets as bigint,
+      remainingAmount: remainingAmount as bigint,
+      isActive: isActive as boolean
+    };
+    console.log(
+      'redPacketInfo 转换后:',
+      JSON.stringify(redPacketInfo, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
+    );
   }
 
-  const json = JSON.stringify(redPacketInfo, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
-  console.log('redPacketInfo', json);
-
   const {
-    data: userInfoArr,
+    data: userInfoData,
     refetch: refetchUserInfo,
-    isLoading: isLoadingUser
+    isLoading: isLoadingUser,
+    isError: isErrorUser,
+    error: errorUser
   } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
     abi: RED_PACKET_ABI,
@@ -88,19 +102,32 @@ const App: React.FC = () => {
       enabled: isClient && !!address && !!RED_PACKET_CONTRACT_ADDRESS,
       refetchInterval: 10000
     }
-  }) as { data: UserInfoArr | undefined; refetch: () => void; isLoading: boolean };
+  });
 
-  const userArr: [boolean, bigint] | undefined = userInfoArr;
+  // 添加调试日志
+  useEffect(() => {
+    console.log('=== 用户信息调试 ===');
+    console.log('address:', address);
+    console.log('isLoadingUser:', isLoadingUser);
+    console.log('isErrorUser:', isErrorUser);
+    console.log('errorUser:', errorUser);
+    console.log('userInfoData 原始数据:', userInfoData);
+    console.log('userInfoData 类型:', typeof userInfoData);
+  }, [address, isLoadingUser, isErrorUser, errorUser, userInfoData]);
 
+  // 修复：数据转换
   let userInfo: UserInfo | undefined;
-
-  if (userArr) {
-    const [claimed, amount] = userArr;
-    userInfo = { claimed, amount };
+  if (userInfoData && Array.isArray(userInfoData) && userInfoData.length === 2) {
+    const [claimed, amount] = userInfoData;
+    userInfo = {
+      claimed: claimed as boolean,
+      amount: amount as bigint
+    };
+    console.log(
+      'userInfo 转换后:',
+      JSON.stringify(userInfo, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
+    );
   }
-
-  const json1 = JSON.stringify(userInfo, (_, v) => (typeof v === 'bigint' ? v.toString() : v));
-  console.log('userInfo', json1);
 
   const { data: previewAmount } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
@@ -109,7 +136,7 @@ const App: React.FC = () => {
     query: {
       enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS
     }
-  }) as { data: [bigint, bigint] | undefined };
+  });
 
   const { data: owner } = useReadContract({
     address: RED_PACKET_CONTRACT_ADDRESS,
@@ -118,7 +145,7 @@ const App: React.FC = () => {
     query: {
       enabled: isClient && !!RED_PACKET_CONTRACT_ADDRESS
     }
-  }) as { data: Address | undefined };
+  });
 
   // 合约写入
   const {
@@ -209,7 +236,11 @@ const App: React.FC = () => {
     });
   };
 
-  const isOwner = !!(address && owner && address.toLowerCase() === owner.toLowerCase());
+  const isOwner = !!(
+    address &&
+    owner &&
+    address.toLowerCase() === (owner as Address).toLowerCase()
+  );
   const progress = redPacketInfo
     ? (Number(redPacketInfo.claimedPackets) / Number(redPacketInfo.totalPackets)) * 100
     : 0;
@@ -258,17 +289,16 @@ const App: React.FC = () => {
             </div>
           </div>
         ) : isDataLoading ? (
-          // 添加全局加载状态
           <div className="text-center py-20">
             <div className="w-16 h-16 border-4 border-red-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
             <p className="text-xl text-gray-600">加载红包数据中...</p>
           </div>
         ) : isErrorInfo ? (
-          // 添加错误状态
           <div className="text-center py-20">
             <XCircleIcon className="w-16 h-16 text-red-500 mx-auto mb-4" />
             <h2 className="text-2xl font-bold text-gray-900 mb-2">加载失败</h2>
             <p className="text-gray-600 mb-4">无法连接到智能合约，请检查网络连接</p>
+            {errorInfo && <p className="text-sm text-red-500 mb-4">{errorInfo.message}</p>}
             <button
               onClick={() => refetchInfo()}
               className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
@@ -297,14 +327,17 @@ const App: React.FC = () => {
                   ) : redPacketInfo?.isActive ? (
                     <div className="space-y-6">
                       <h2 className="text-3xl font-bold text-gray-900">点击抢红包！</h2>
-                      {previewAmount && previewAmount[0] > BigInt(0) && (
-                        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
-                          <p className="text-sm text-yellow-800 mb-2">预计金额范围</p>
-                          <div className="text-lg font-semibold text-yellow-900">
-                            {formatEther(previewAmount[0])} - {formatEther(previewAmount[1])} ETH
+                      {previewAmount &&
+                        Array.isArray(previewAmount) &&
+                        previewAmount[0] > BigInt(0) && (
+                          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-2xl p-6 border border-yellow-200">
+                            <p className="text-sm text-yellow-800 mb-2">预计金额范围</p>
+                            <div className="text-lg font-semibold text-yellow-900">
+                              {formatEther(previewAmount[0] as bigint)} -{' '}
+                              {formatEther(previewAmount[1] as bigint)} ETH
+                            </div>
                           </div>
-                        </div>
-                      )}
+                        )}
                       <button
                         onClick={handleClaimRedPacket}
                         disabled={isClaimPending || isClaimLoading}
