@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "webpack.config.js",
   "scripts": {
-    "dev": "webpack serve --mode development",
-    "prod": "webpack serve --mode production",
+    "dev": "cross-env NODE_ENV=development webpack serve --mode development",
+    "prod": "cross-env NODE_ENV=production webpack serve --mode production",
     "build": "webpack --mode production",
     "preview": "npx serve dist -p 3000",
     "test:ui": "backstop init",
@@ -71,6 +71,7 @@
     "autoprefixer": "^10.4.21",
     "backstopjs": "^6.3.25",
     "clean-webpack-plugin": "^4.0.0",
+    "cross-env": "^10.1.0",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "cypress": "^15.1.0",
