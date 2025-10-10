@@ -80,7 +80,7 @@ const webpackBaseConfig = {
     }),
     new webpack.DefinePlugin({
       'process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS': JSON.stringify(
-        process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS
+        process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS || '0xf7C007d53744493C6E0C60532aDB7a4B16D84C1A'
       )
     })
   ]

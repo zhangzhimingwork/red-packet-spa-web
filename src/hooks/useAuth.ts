@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://web3test.uk';
+// const API_BASE_URL = 'https://web3test.uk';
+const API_BASE_URL = 'http://localhost:8787';
 const TOKEN_KEY = 'web3_auth_token';
 
 interface NonceResponse {
