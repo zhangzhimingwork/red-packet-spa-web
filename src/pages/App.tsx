@@ -14,9 +14,7 @@ import WalletConnect from '../components/WalletConnect';
 import { abi as RED_PACKET_ABI } from '../abis';
 
 // 修复：环境变量应该是 REACT_APP_ 开头
-const RED_PACKET_CONTRACT_ADDRESS =
-  process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS ||
-  ('0xf7C007d53744493C6E0C60532aDB7a4B16D84C1A' as Address);
+const RED_PACKET_CONTRACT_ADDRESS = process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS as Address;
 console.log('RED_PACKET_CONTRACT_ADDRESS', RED_PACKET_CONTRACT_ADDRESS);
 
 interface RedPacketInfo {

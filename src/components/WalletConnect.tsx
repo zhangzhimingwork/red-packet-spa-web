@@ -20,6 +20,8 @@ import Blockies from 'react-blockies';
 import maiinnet from '@/assets/mainnet.svg';
 import sepolia from '@/assets/sepolia.svg';
 import { useAuth } from '@/hooks/useAuth';
+import { useWallet } from '@yideng/hooks';
+import { formatWalletAddress } from '@yideng/libs';
 
 interface WalletConnectProps {
   className?: string;
@@ -61,8 +63,9 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
   const [showAccountDropdown, setShowAccountDropdown] = useState(false);
   const [copySuccess, setCopySuccess] = useState(false);
 
+  const { connect } = useWallet();
   const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending: isConnecting } = useConnect();
+  const { connectors, isPending: isConnecting } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: ensName } = useEnsName({ address });
   console.log('ensName', ensName);
@@ -118,7 +121,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
 
   const currentChain = SUPPORTED_CHAINS.find(chain => chain.id === chainId) || SUPPORTED_CHAINS[0];
 
-  const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  // const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   const formatBalance = (b: BalanceType | undefined) => {
     if (!b) return '0.0000';
@@ -145,7 +148,8 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
       return;
     }
     try {
-      await connect({ connector: target });
+      // await connect({ connector: target });
+      await connect();
     } catch (err) {
       console.error('connect error', err);
     }
@@ -251,7 +255,14 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
 
           <span className="text-sm font-medium text-gray-800">
-            {ensName || (address ? formatAddress(address) : 'Unknown')}
+            {ensName ||
+              (address
+                ? formatWalletAddress(address, {
+                    prefixLength: 6,
+                    suffixLength: 4,
+                    separator: '...'
+                  })
+                : 'Unknown')}
           </span>
 
           {/* 认证状态指示器 */}
@@ -282,7 +293,7 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
 
                 <div className="flex-1 min-w-0">
                   <div className="text-lg font-semibold text-gray-900 mb-1">
-                    {ensName || formatAddress(address || '')}
+                    {ensName || formatWalletAddress(address || '')}
                   </div>
 
                   {/* 认证状态徽章 */}
