@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAccount, useSignMessage } from 'wagmi';
 import axios from 'axios';
 
@@ -31,6 +31,7 @@ interface AuthState {
 }
 
 export function useAuth() {
+  const [domain, setDomain] = useState('');
   const { address, isConnected } = useAccount();
   const { signMessageAsync } = useSignMessage();
 
@@ -41,6 +42,10 @@ export function useAuth() {
     error: null,
     address: null
   });
+
+  useEffect(() => {
+    setDomain(window.location.origin);
+  }, []);
 
   /**
    * 登录：获取nonce、签名、验证
@@ -67,7 +72,8 @@ export function useAuth() {
     try {
       // 步骤1: 获取签名消息
       const nonceResponse = await axios.post<NonceResponse>(`${API_BASE_URL}/api/auth/nonce`, {
-        address
+        address,
+        domain
       });
 
       const { message, expiresAt } = nonceResponse.data;
