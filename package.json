@@ -15,7 +15,7 @@
     "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx,.js --fix",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:staged": "npx @biomejs/biome check --write ./src",
-    "prepare": "husky",
+    "prepare": "husky install",
     "code-review": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh",
     "code-review:enhanced": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh --enhanced",
     "code-review:custom": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh"
