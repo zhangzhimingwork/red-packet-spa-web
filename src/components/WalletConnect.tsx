@@ -22,12 +22,13 @@ import sepolia from '@/assets/sepolia.svg';
 import { useAuth } from '@/hooks/useAuth';
 import { useWallet } from '@yideng/hooks';
 import { formatWalletAddress } from '@yideng/libs';
+import { Button } from '@my-ui/ui';
 
 interface WalletConnectProps {
   className?: string;
-  requireAuth?: boolean; // 是否需要身份验证
-  onAuthSuccess?: () => void; // 认证成功回调
-  onAuthError?: (error: string) => void; // 认证失败回调
+  requireAuth?: boolean;
+  onAuthSuccess?: () => void;
+  onAuthError?: (error: string) => void;
 }
 
 interface BalanceType {
@@ -75,7 +76,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
   const { switchChain } = useSwitchChain();
   const chainId = useChainId();
 
-  // 使用 Web3 身份验证 Hook
   const {
     isAuthenticated,
     isLoading: isAuthLoading,
@@ -93,7 +93,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
     setMounted(true);
   }, []);
 
-  // 当钱包连接后，如果需要认证且未认证，则提示用户签名
   useEffect(() => {
     const auth = async () => {
       if (isConnected && requireAuth && !isAuthenticated && !isAuthLoading) {
@@ -112,7 +111,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
     auth();
   }, [isConnected, requireAuth, isAuthenticated, isAuthLoading, onAuthSuccess, login]);
 
-  // 处理认证错误
   useEffect(() => {
     if (authError && onAuthError) {
       onAuthError(authError);
@@ -120,8 +118,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
   }, [authError, onAuthError]);
 
   const currentChain = SUPPORTED_CHAINS.find(chain => chain.id === chainId) || SUPPORTED_CHAINS[0];
-
-  // const formatAddress = (addr: string) => `${addr.slice(0, 6)}...${addr.slice(-4)}`;
 
   const formatBalance = (b: BalanceType | undefined) => {
     if (!b) return '0.0000';
@@ -148,7 +144,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
       return;
     }
     try {
-      // await connect({ connector: target });
       await connect();
     } catch (err) {
       console.error('connect error', err);
@@ -172,17 +167,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
 
   const handleDisconnect = () => {
     disconnect();
-    authLogout(); // 同时登出身份验证
+    authLogout();
     setShowAccountDropdown(false);
   };
 
   if (!mounted) return null;
 
-  // 未连接钱包
   if (!isConnected) {
     return (
       <div className={`${className}`}>
-        <button
+        <Button
           onClick={handleConnect}
           disabled={isConnecting}
           className="group relative px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all duration-150"
@@ -190,17 +184,17 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
           <div className="relative flex items-center space-x-3">
             <span>{isConnecting ? 'Connecting...' : 'Connect Wallet'}</span>
           </div>
-        </button>
+        </Button>
       </div>
     );
   }
 
-  // 已连接且已认证（或不需要认证）
   return (
     <div className={`flex items-center space-x-2 ${className}`}>
-      {/* 左：网络选择 */}
+      {/* 网络选择 */}
       <div className="relative">
-        <button
+        <Button
+          variant="link"
           onClick={() => setShowNetworkDropdown(s => !s)}
           className="flex items-center space-x-2 px-4 py-2.5 border border-gray-200 rounded-xl bg-white hover:shadow-sm transition"
         >
@@ -209,12 +203,13 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
           </div>
           <span className="text-sm font-medium text-gray-800">{currentChain.name}</span>
           <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-        </button>
+        </Button>
 
         {showNetworkDropdown && (
           <div className="absolute top-full left-0 mt-2 w-52 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
             {SUPPORTED_CHAINS.map(chain => (
-              <button
+              <Button
+                variant="link"
                 key={chain.id}
                 onClick={() => handleNetworkChange(chain.id)}
                 className={`w-full flex items-center space-x-3 px-4 py-3 text-left hover:bg-gray-50 transition-colors ${
@@ -228,15 +223,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
                 {chain.id === chainId && (
                   <span className="ml-auto w-2 h-2 bg-blue-500 rounded-full" />
                 )}
-              </button>
+              </Button>
             ))}
           </div>
         )}
       </div>
 
-      {/* 右：账户信息 */}
+      {/* 账户信息 */}
       <div className="relative">
-        <button
+        <Button
+          variant="link"
           onClick={() => setShowAccountDropdown(s => !s)}
           className="flex items-center space-x-3 px-4 py-2.5 border border-gray-200 rounded-xl bg-white hover:shadow-sm transition"
         >
@@ -265,13 +261,12 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
                 : 'Unknown')}
           </span>
 
-          {/* 认证状态指示器 */}
           {requireAuth && isAuthenticated && (
             <div className="w-2 h-2 bg-green-500 rounded-full" title="Authenticated" />
           )}
 
           <ChevronDownIcon className="w-4 h-4 text-gray-500" />
-        </button>
+        </Button>
 
         {showAccountDropdown && (
           <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
@@ -296,7 +291,6 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
                     {ensName || formatWalletAddress(address || '')}
                   </div>
 
-                  {/* 认证状态徽章 */}
                   {requireAuth && (
                     <div className="flex items-center space-x-1 text-xs">
                       {isAuthenticated ? (
@@ -324,7 +318,8 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
 
             <div className="flex flex-col gap-1 p-4 border-t border-gray-100">
               <div className="flex gap-1">
-                <button
+                <Button
+                  variant="link"
                   onClick={handleCopyAddress}
                   className={`w-full flex gap-1 items-center justify-center px-2 py-2 rounded-lg font-medium transition-all duration-200 text-xs ${
                     copySuccess
@@ -334,15 +329,16 @@ const WalletConnect: React.FC<WalletConnectProps> = ({
                 >
                   <DocumentDuplicateIcon className="w-4 h-4" />
                   <span>{copySuccess ? 'Copied!' : 'Copy Address'}</span>
-                </button>
+                </Button>
 
-                <button
+                <Button
+                  variant="link"
                   onClick={handleDisconnect}
                   className="w-full flex gap-1 items-center justify-center px-2 py-2 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg font-medium transition-colors duration-200 border border-transparent hover:border-red-200 text-xs"
                 >
                   <ArrowRightOnRectangleIcon className="w-4 h-4" />
                   <span>Disconnect</span>
-                </button>
+                </Button>
               </div>
             </div>
           </div>

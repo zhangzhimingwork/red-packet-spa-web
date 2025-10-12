@@ -15,7 +15,7 @@
     "lint:fix": "tsc --noEmit && eslint ./src --ext .ts,.tsx,.js --fix",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint:staged": "npx @biomejs/biome check --write ./src",
-    "prepare": "husky",
+    "prepare": "husky install",
     "code-review": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh",
     "code-review:enhanced": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh --enhanced",
     "code-review:custom": "chmod +x scripts/code-review/run.sh && ./scripts/code-review/run.sh"
@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@my-ui/ui": "^1.0.0",
     "@tanstack/query-core": "^5.90.2",
     "@tanstack/react-query": "^5.90.2",
     "@welldone-software/why-did-you-render": "^10.0.1",

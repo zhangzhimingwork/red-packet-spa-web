@@ -10,10 +10,10 @@ import {
   FireIcon
 } from '@heroicons/react/24/outline';
 import WalletConnect from '../components/WalletConnect';
+import { Button, Card } from '@my-ui/ui';
 
 import { abi as RED_PACKET_ABI } from '../abis';
 
-// 修复：环境变量应该是 REACT_APP_ 开头
 const RED_PACKET_CONTRACT_ADDRESS = process.env.REACT_PUBLIC_RED_PACKET_CONTRACT_ADDRESS as Address;
 console.log('RED_PACKET_CONTRACT_ADDRESS', RED_PACKET_CONTRACT_ADDRESS);
 
@@ -40,7 +40,6 @@ const App: React.FC = () => {
     setIsClient(true);
   }, []);
 
-  // 修复：useReadContract 的正确用法
   const {
     data: redPacketInfoData,
     refetch: refetchInfo,
@@ -57,7 +56,6 @@ const App: React.FC = () => {
     }
   });
 
-  // 添加调试日志
   useEffect(() => {
     console.log('=== 红包信息调试 ===');
     console.log('isClient:', isClient);
@@ -69,7 +67,6 @@ const App: React.FC = () => {
     console.log('redPacketInfoData 类型:', typeof redPacketInfoData);
   }, [isClient, isLoadingInfo, isErrorInfo, errorInfo, redPacketInfoData]);
 
-  // 修复：数据转换
   let redPacketInfo: RedPacketInfo | undefined;
   if (redPacketInfoData && Array.isArray(redPacketInfoData) && redPacketInfoData.length === 5) {
     const [totalAmount, totalPackets, claimedPackets, remainingAmount, isActive] =
@@ -104,7 +101,6 @@ const App: React.FC = () => {
     }
   });
 
-  // 添加调试日志
   useEffect(() => {
     console.log('=== 用户信息调试 ===');
     console.log('address:', address);
@@ -115,7 +111,6 @@ const App: React.FC = () => {
     console.log('userInfoData 类型:', typeof userInfoData);
   }, [address, isLoadingUser, isErrorUser, errorUser, userInfoData]);
 
-  // 修复：数据转换
   let userInfo: UserInfo | undefined;
   if (userInfoData && Array.isArray(userInfoData) && userInfoData.length === 2) {
     const [claimed, amount] = userInfoData;
@@ -147,7 +142,6 @@ const App: React.FC = () => {
     }
   });
 
-  // 合约写入
   const {
     writeContract: claimRedPacket,
     data: claimHash,
@@ -169,7 +163,6 @@ const App: React.FC = () => {
     isPending: isWithdrawPending
   } = useWriteContract();
 
-  // 等待交易确认
   const { isLoading: isClaimLoading, isSuccess: isClaimSuccess } = useWaitForTransactionReceipt({
     hash: claimHash
   });
@@ -245,7 +238,6 @@ const App: React.FC = () => {
     ? (Number(redPacketInfo.claimedPackets) / Number(redPacketInfo.totalPackets)) * 100
     : 0;
 
-  // 添加加载状态判断
   const isDataLoading = isLoadingInfo || (isConnected && isLoadingUser);
 
   if (!isClient) return null;
@@ -299,18 +291,15 @@ const App: React.FC = () => {
             <h2 className="text-2xl font-bold text-gray-900 mb-2">加载失败</h2>
             <p className="text-gray-600 mb-4">无法连接到智能合约，请检查网络连接</p>
             {errorInfo && <p className="text-sm text-red-500 mb-4">{errorInfo.message}</p>}
-            <button
-              onClick={() => refetchInfo()}
-              className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-            >
+            <Button onClick={() => refetchInfo()} className="px-6 py-2">
               重试
-            </button>
+            </Button>
           </div>
         ) : (
           <div className="flex flex-col">
             {/* 主要红包区域 */}
             <div className="lg:col-span-2">
-              <div className="bg-white rounded-3xl shadow-xl p-8 mb-6">
+              <Card className="mb-6 p-8">
                 <div className="text-center mb-8">
                   <div className="w-20 h-20 bg-gradient-to-r from-red-500 to-pink-500 rounded-full flex items-center justify-center mx-auto mb-6">
                     <GiftIcon className="w-10 h-10 text-white" />
@@ -338,10 +327,10 @@ const App: React.FC = () => {
                             </div>
                           </div>
                         )}
-                      <button
+                      <Button
                         onClick={handleClaimRedPacket}
                         disabled={isClaimPending || isClaimLoading}
-                        className="w-full py-4 px-8 bg-gradient-to-r from-red-600 to-pink-600 text-white text-xl font-bold rounded-2xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                        className="w-full py-4 px-8 bg-gradient-to-r from-red-600 to-pink-600 text-white text-xl font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                       >
                         {isClaimPending || isClaimLoading ? (
                           <div className="flex items-center justify-center space-x-2">
@@ -354,7 +343,7 @@ const App: React.FC = () => {
                             <span>抢红包</span>
                           </div>
                         )}
-                      </button>
+                      </Button>
                     </div>
                   ) : (
                     <div className="space-y-4">
@@ -370,13 +359,13 @@ const App: React.FC = () => {
                     </div>
                   )}
                 </div>
-              </div>
+              </Card>
             </div>
 
             {/* 侧边栏 */}
             <div className="space-y-6">
               {/* 红包统计 */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <Card className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                   <SparklesIcon className="w-5 h-5 text-red-500" />
                   <span>红包统计</span>
@@ -427,31 +416,31 @@ const App: React.FC = () => {
                     <p className="mt-2">加载中...</p>
                   </div>
                 )}
-              </div>
+              </Card>
 
               {/* 管理员功能 */}
               {isOwner && (
-                <div className="bg-white rounded-2xl shadow-lg p-6">
+                <Card className="p-6">
                   <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
                     <CurrencyDollarIcon className="w-5 h-5 text-green-500" />
                     <span>管理员功能</span>
                   </h3>
                   <div className="space-y-4">
-                    <button
+                    <Button
                       onClick={handleToggleActive}
                       disabled={isTogglePending || isToggleLoading}
-                      className={`w-full py-2 px-4 rounded-lg font-medium transition-colors ${
+                      className={`w-full ${
                         redPacketInfo?.isActive
                           ? 'bg-red-100 text-red-700 hover:bg-red-200'
                           : 'bg-green-100 text-green-700 hover:bg-green-200'
-                      } disabled:opacity-50`}
+                      }`}
                     >
                       {isTogglePending || isToggleLoading
                         ? '处理中...'
                         : redPacketInfo?.isActive
                           ? '暂停红包'
                           : '开启红包'}
-                    </button>
+                    </Button>
                     <div className="space-y-2">
                       <input
                         type="number"
@@ -461,27 +450,27 @@ const App: React.FC = () => {
                         onChange={e => setFundAmount(e.target.value)}
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       />
-                      <button
+                      <Button
                         onClick={handleAddFunds}
                         disabled={!fundAmount || isAddFundsPending || isAddFundsLoading}
-                        className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full bg-blue-600 text-white hover:bg-blue-700"
                       >
                         {isAddFundsPending || isAddFundsLoading ? '处理中...' : '添加资金'}
-                      </button>
+                      </Button>
                     </div>
-                    <button
+                    <Button
                       onClick={handleEmergencyWithdraw}
                       disabled={isWithdrawPending || isWithdrawLoading}
-                      className="w-full py-2 px-4 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full bg-red-600 text-white hover:bg-red-700"
                     >
                       {isWithdrawPending || isWithdrawLoading ? '处理中...' : '紧急提取'}
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </Card>
               )}
 
               {/* 使用说明 */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
+              <Card className="p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">使用说明</h3>
                 <div className="space-y-3 text-sm text-gray-600">
                   <div className="flex items-start space-x-2">
@@ -503,7 +492,7 @@ const App: React.FC = () => {
                     <span>抢到即时到账，无需等待</span>
                   </div>
                 </div>
-              </div>
+              </Card>
             </div>
           </div>
         )}
