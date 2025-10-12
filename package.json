@@ -30,6 +30,7 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@my-ui/ui": "^1.0.0",
     "@tanstack/query-core": "^5.90.2",
     "@tanstack/react-query": "^5.90.2",
     "@welldone-software/why-did-you-render": "^10.0.1",
