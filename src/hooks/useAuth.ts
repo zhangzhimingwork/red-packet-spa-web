@@ -118,7 +118,7 @@ export function useAuth() {
 
       return false;
     }
-  }, [address, isConnected, signMessageAsync]);
+  }, [address, isConnected, signMessageAsync, domain]);
 
   /**
    * 登出：清除Token
